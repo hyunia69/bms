@@ -1,0 +1,92 @@
+# =============================================================================
+# 검색(retrieval) eval 세트 — threshold 확정 + 회귀 검출
+# 결정 근거: CEO#6(반복 eval) / CEO T1(threshold=빌드 초기 설계값) / D6(부정 eval)
+# =============================================================================
+# 세 종류:
+#   positive    보장 시나리오 — 기대문서가 Top-K 안에 있어야 함
+#   rag_forcing 키워드로는 안 잡히는 케이스(코드없음·표현다름·복합·자연어) — RAG의 존재 이유
+#   negative    매칭없음 → 근거없음. 어떤 문서도 threshold 이상이면 안 됨(환각 0, D6)
+#
+# 러너(scripts/rag_eval.py)가 긍정 hit 유사도 vs 부정 top 유사도 분포를 비교해
+# 근거없음 threshold 를 추천하고, 임베딩 모델의 한글 변별력이 충분한지 판정한다.
+# =============================================================================
+
+version: 1
+match_count: 3
+embed_model: text-embedding-3-large    # T4 결정: small은 긍정/부정 분리 실패(gap −0.028) → large @1536d 채택(gap +0.001)
+embed_dim: 1536                         # vector(1536) 스키마 고정 → 모델 교체해도 DB 마이그레이션 불필요
+# 근거없음 컷오프(잠정): 관련 0.34~0.59 vs off-domain 0.22~0.34. 마진 0.0006로 매우 얇아
+# 단일 컷오프로 완전 분리 불가 → answer-guard(T5) + corpus engineering 병행 필요.
+recommended_threshold: 0.34
+description: "BMS RAG 검색 eval. 긍정·RAG강제·부정으로 recall 측정 + threshold 확정."
+
+cases:
+  # ── 긍정: 보장 시나리오 (Top-3 필수) ──────────────────────────────
+  - id: pos_refrigerant
+    category: positive
+    query: "냉매가 새는 것 같아요"
+    expect_any: ["E-3002_refrigerant_leak.md"]
+  - id: pos_filter
+    category: positive
+    query: "필터 언제 갈아요?"
+    expect_any: ["P-1001_filter_replacement.md"]
+  - id: pos_supply_temp
+    category: positive
+    query: "새벽에 온도가 갑자기 올라갔어요"
+    expect_any: ["E-1002_supply_temp_high.md", "P-2001_seasonal_changeover.md"]
+  - id: pos_cooling_water
+    category: positive
+    query: "냉동기 응축압력이 오르고 냉각수 온도도 같이 올라가요"
+    expect_any: ["P-4001_cooling_tower_water.md", "M-2001_chiller_operating_manual.md"]
+
+  # ── 긍정: RAG강제 (코드없음·표현다름·복합·자연어) ─────────────────
+  - id: rag_gas_colloquial
+    category: rag_forcing
+    subtype: 표현다름
+    query: "에어컨 가스가 빠진 거 같은데"
+    expect_any: ["E-3002_refrigerant_leak.md"]
+  - id: rag_weak_airflow
+    category: rag_forcing
+    subtype: 코드없음
+    query: "바람이 약해지고 좀 답답해요"
+    expect_any: ["P-1001_filter_replacement.md"]
+  - id: rag_pump_noise
+    category: rag_forcing
+    subtype: 코드없음
+    query: "펌프에서 소리가 나고 물이 잘 안 도는 것 같아요"
+    expect_any: ["P-3001_pump_flow_loss.md"]
+  - id: rag_chiller_warm
+    category: rag_forcing
+    subtype: 자연어
+    query: "냉동기 냉수가 설정 온도보다 높게 유지돼요"
+    expect_any: ["M-2001_chiller_operating_manual.md"]
+  - id: rag_season_change
+    category: rag_forcing
+    subtype: 자연어
+    query: "환절기인데 운전 모드를 바꿔야 하나요?"
+    expect_any: ["P-2001_seasonal_changeover.md"]
+  - id: rag_compound
+    category: rag_forcing
+    subtype: 복합증상
+    query: "여러 기기에서 동시에 경고가 뜨고 전류가 같이 올라가요"
+    expect_any: ["P-4001_cooling_tower_water.md", "M-2001_chiller_operating_manual.md", "E-3002_refrigerant_leak.md"]
+
+  # ── 부정: 매칭없음 → 근거없음 (어떤 문서도 threshold 이상이면 안 됨) ──
+  - id: neg_lunch
+    category: negative
+    query: "오늘 점심 메뉴 추천해줘"
+    expect_any: []
+  - id: neg_elevator
+    category: negative
+    subtype: 인접설비
+    query: "엘리베이터가 갑자기 멈췄어요"
+    expect_any: []
+  - id: neg_lighting
+    category: negative
+    subtype: 인접설비
+    query: "사무실 조명이 자꾸 깜빡거려요"
+    expect_any: []
+  - id: neg_parking
+    category: negative
+    query: "주차장에 자리 있나요?"
+    expect_any: []

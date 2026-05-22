@@ -1,0 +1,10 @@
+# secrets — never commit
+.env
+
+# python
+.venv/
+__pycache__/
+*.pyc
+
+# claude code — local machine settings (not shared)
+.claude/settings.local.json

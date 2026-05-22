@@ -1,0 +1,224 @@
+# =============================================================================
+# BMS HVAC 고장 카탈로그 — 단일 진실원 (Single Source of Truth)
+# =============================================================================
+# 결정 근거: eng-review D3 / CEO#1 (시나리오-먼저, 감지규칙+문서 보장 생성)
+#
+# 이 파일은 두 소비자가 공유하는 SoT다:
+#   - 시뮬레이터 (T6): 이 시그니처대로 "물리적으로 그럴듯한" 상관 고장을 raw_logs에 주입
+#   - 감지기     (T8): raw_logs 센서 추세를 이 시그니처와 매칭 → incidents 생성
+# 감지기는 "주입 로그"를 읽지 않고 오직 센서 패턴만 본다 (D3 → 순환 eval 방지).
+#
+# 핵심 규율:
+#   1. 시그니처 sensor 는 반드시 raw_logs 의 실제 컬럼명만 사용 (아래 sensor_columns).
+#      설계의 물리센서(흡입압력/토출온도/차압/유량)는 가용 컬럼으로 매핑한다.
+#   2. 추세(trend) 기반 판정 — 절대 임계값이 아니라 시간창 안의 방향+변화폭+연속폴.
+#      (E-3002 문서: "단일 폴 순간값보다 추세로 판단해야 오탐을 줄인다")
+#   3. severity / level 어휘는 raw_logs.status / incidents.level 과 일치: 경고 < 오류 < 위험.
+#   4. fingerprint = "<device_id>:<fingerprint_type>"  → incidents.fingerprint (D5 멱등).
+# =============================================================================
+
+version: 1
+updated: "2026-05-22"
+description: "BMS 공조 고장 시그니처 SoT. 시뮬레이터(주입) + 감지기(매칭)가 공유."
+
+# raw_logs 에서 시그니처가 참조할 수 있는 유일한 센서 컬럼들 (T1 스키마 고정).
+# 시그니처에 이 목록 밖의 sensor 가 나오면 그 카탈로그는 잘못된 것이다.
+sensor_columns:
+  - temp_supply     # 급기 온도 / 냉수 출구 온도 (기기에 따라)
+  - temp_return     # 환기 온도 / 냉수 입구·냉각수 환수 온도
+  - temp_outdoor    # 외기 온도
+  - humidity        # 습도
+  - pressure        # 시스템 압력 (냉동기=흡입/저압측 또는 응축압력 프록시)
+  - airflow         # 풍량 (펌프의 경우 유량 프록시)
+  - current         # 전류
+  - power           # 전력
+  - runtime_hours   # 누적 가동시간
+
+# -----------------------------------------------------------------------------
+# 기기별 정상 베이스라인 (POC 수준)
+#   - CHILLER 는 M-2001 매뉴얼 근거. 나머지는 POC 추정값 (정밀 베이스라인·시간대 패턴은 T6 시뮬레이터 소관).
+#   - 시그니처는 추세 기반이라 절대 베이스라인에 강하게 의존하지 않지만,
+#     시뮬레이터가 "정상"을 만들고 변화폭(%)을 계산하는 기준점으로 쓴다.
+# -----------------------------------------------------------------------------
+device_profiles:
+  CHILLER:
+    source: "M-2001 (수냉식 냉동기 운전 매뉴얼)"
+    normal:
+      temp_supply: { range: [5.5, 8.5], unit: "°C", note: "냉수 출구 7±1.5" }
+      temp_return: { range: [11.0, 14.0], unit: "°C", note: "냉수 입출구 차온 ~5" }
+      pressure:    { range: [380, 520], unit: "kPa", note: "흡입(저압측) 압력, POC 추정" }
+      current:     { range: [60, 90], unit: "A", note: "POC 추정" }
+      power:       { range: [40, 65], unit: "kW", note: "POC 추정" }
+  AHU:
+    source: "POC 추정"
+    normal:
+      temp_supply: { range: [13.0, 18.0], unit: "°C", note: "급기온도" }
+      temp_return: { range: [22.0, 26.0], unit: "°C", note: "환기온도" }
+      airflow:     { range: [8000, 12000], unit: "m³/h" }
+      pressure:    { range: [180, 260], unit: "Pa", note: "필터 차압 프록시" }
+      current:     { range: [10, 18], unit: "A" }
+  FCU:
+    source: "POC 추정"
+    normal:
+      temp_supply: { range: [13.0, 18.0], unit: "°C" }
+      airflow:     { range: [600, 1200], unit: "m³/h" }
+      pressure:    { range: [60, 120], unit: "Pa", note: "필터 차압 프록시" }
+      current:     { range: [1.5, 3.5], unit: "A" }
+  COOLING_TOWER:
+    source: "POC 추정"
+    normal:
+      temp_supply: { range: [29.0, 32.0], unit: "°C", note: "냉각수 출수(냉각탑 출구)" }
+      temp_return: { range: [34.0, 37.0], unit: "°C", note: "냉각수 환수(냉각탑 입구)" }
+      current:     { range: [15, 30], unit: "A", note: "팬 전류" }
+  PUMP:
+    source: "POC 추정"
+    normal:
+      airflow:  { range: [120, 180], unit: "m³/h", note: "유량(flow) 프록시" }
+      pressure: { range: [250, 350], unit: "kPa", note: "토출 압력" }
+      current:  { range: [8, 14], unit: "A" }
+
+# -----------------------------------------------------------------------------
+# 단일 고장
+#   각 고장은 시뮬레이터가 주입하고 감지기가 매칭하는 한 단위.
+#   require: all  → 나열된 시그니처가 모두 동반될 때만 확정 (오탐↓, D6 false-positive 방어)
+# -----------------------------------------------------------------------------
+faults:
+
+  - id: refrigerant_leak
+    name: "냉매 누출 / 저압 이상"
+    error_code: "E-3002"            # 코드 있음 → 하이브리드 검색에서 직접 조회 가능 (전제 #6)
+    related_codes: ["E-3001", "E-3003", "E-3010", "E-2005"]
+    rag_docs: ["E-3002_refrigerant_leak.md"]
+    device_types: ["CHILLER"]
+    fingerprint_type: "refrigerant_leak"
+    detection:
+      window_minutes: 30            # 수십 분에 걸쳐 진행되는 추세
+      min_consecutive_polls: 3      # E-3002 문서: 3회 연속 폴 이상 지속 시 확정
+      trend: gradual
+      require: all
+      signature:
+        - { sensor: pressure,    direction: down, min_change_pct: 15, rationale: "흡입(저압측) 압력 저하" }
+        - { sensor: temp_supply, direction: up,   min_change_abs: 2.0, unit: "°C", rationale: "냉수 출구 온도 상승(열교환 불량)" }
+        - { sensor: current,     direction: up,   min_change_pct: 10, rationale: "압축기 부하 상승·잦은 단속운전" }
+    # 압력 저하 폭에 따라 수준 상승 (E-3002: 오류~위험). 큰 값부터 먼저 평가.
+    severity_by_pressure_drop_pct:
+      - { min_pct: 35, level: 위험 }
+      - { min_pct: 20, level: 오류 }
+      - { min_pct: 10, level: 경고 }
+    simulation:
+      onset_minutes: 30             # 점진 진행 (단일 수치 튀김 아님)
+      correlated: true              # 세 센서가 동반 변화해야 "그럴듯"
+    notes: "외기 급변 직후 일시 저압은 정상 — 연속 폴 지속 시만 E-3002 확정 (E-3002 비고)."
+
+  - id: filter_clogging
+    name: "공기 필터 막힘"
+    error_code: null                # 의도적 null → 코드 없는 의미검색 강제 케이스 (T1 corpus engineering)
+    related_codes: []
+    rag_docs: ["P-1001_filter_replacement.md"]
+    device_types: ["AHU", "FCU"]
+    fingerprint_type: "filter_clogging"
+    detection:
+      window_minutes: 60            # 필터는 천천히 막힘 → 더 긴 창
+      min_consecutive_polls: 5
+      trend: gradual_slow
+      require: all
+      signature:
+        - { sensor: airflow,     direction: down, min_change_pct: 20, rationale: "막힘으로 풍량 저하" }
+        - { sensor: pressure,    direction: up,   min_change_pct: 15, rationale: "필터 차압 상승(pressure 프록시)" }
+        - { sensor: temp_supply, direction: up,   min_change_abs: 1.5, unit: "°C", rationale: "풍량 저하 → 급기온도 이상" }
+    severity_by_airflow_drop_pct:
+      - { min_pct: 40, level: 위험 }
+      - { min_pct: 25, level: 오류 }
+      - { min_pct: 15, level: 경고 }
+    simulation:
+      onset_minutes: 120            # 데모용으로 압축 (실제는 수일). 강제주입 시 단축 가능.
+      correlated: true
+    notes: "차압계 설정값 초과 시 주기 무관 교체 (P-1001). 추세 모니터링으로 교체 시점 예측."
+
+  - id: supply_temp_high
+    name: "급기온도 급상승 (상한 초과)"
+    error_code: "E-1002"            # T3에서 문서 생성 → 코드 연결 (하이브리드 직접조회 가능)
+    related_codes: ["E-1001", "E-2005"]
+    rag_docs: ["E-1002_supply_temp_high.md", "P-2001_seasonal_changeover.md"]
+    device_types: ["AHU", "FCU"]
+    fingerprint_type: "supply_temp_high"
+    detection:
+      window_minutes: 15            # 짧은 창 — '갑자기'를 잡는다
+      min_consecutive_polls: 2
+      trend: sudden                 # 점진(filter)과 구분: 계단형 급변
+      require: all
+      signature:
+        - { sensor: temp_supply, direction: up, min_change_abs: 4.0, unit: "°C", within_polls: 2, rationale: "급기온도 계단형 급상승" }
+      context_hints:                # 감지·설명 보조 (필수 시그니처 아님)
+        - "주로 새벽/기동 시점 — 계절 운전 전환 미스 가능"
+        - { related_sensor: temp_outdoor, note: "외기 급변과 동반되면 계절운전 원인 의심" }
+    severity_by_temp_rise_abs:
+      - { min_abs: 8.0, level: 위험 }
+      - { min_abs: 5.0, level: 오류 }
+      - { min_abs: 4.0, level: 경고 }
+    simulation:
+      onset_minutes: 5              # 거의 step
+      correlated: false
+    notes: "검증 시나리오 #3: '새벽에 온도가 갑자기 올라갔어요'. filter_clogging(점진)과 달리 sudden."
+
+  - id: pump_anomaly
+    name: "순환펌프 유량 이상"
+    error_code: null                # 펌프 이상은 코드 없이 센서패턴 감지 → 의미검색
+    related_codes: []
+    rag_docs: ["P-3001_pump_flow_loss.md"]
+    device_types: ["PUMP"]
+    fingerprint_type: "pump_anomaly"
+    detection:
+      window_minutes: 20
+      min_consecutive_polls: 3
+      trend: gradual
+      require: all
+      signature:
+        - { sensor: airflow, direction: down, min_change_pct: 25, rationale: "유량 저하(airflow=flow 프록시)" }
+        - { sensor: current, direction: fluctuating, min_cov_pct: 15, rationale: "전류 변동폭 확대(부하 불안정)" }
+    severity_by_airflow_drop_pct:
+      - { min_pct: 40, level: 위험 }
+      - { min_pct: 25, level: 오류 }
+    simulation:
+      onset_minutes: 20
+      correlated: true
+    notes: "fluctuating = 추세 방향이 아니라 윈도우 내 변동계수(CoV)로 판정."
+
+# -----------------------------------------------------------------------------
+# 상관(복합) 시나리오 — PRD 시나리오 C
+#   여러 기기에서 같은 시간창에 동반 신호 → 공통 근본 원인 추론 + 조치 우선순위.
+#   감지기는 같은 detection window 안에서 participants 가 모두/다수 매칭될 때 상관 incident 로 승격.
+# -----------------------------------------------------------------------------
+correlated_scenarios:
+
+  - id: cooling_water_loop_degradation
+    name: "냉각수 계통 성능 저하 (복합)"
+    root_cause: "냉각탑 효율 저하 또는 냉각수 순환 부족 → 응축 측 열방출 불량이 냉동기 전체로 파급"
+    fingerprint_type: "cooling_water_loop"
+    rag_docs: ["M-2001_chiller_operating_manual.md", "P-4001_cooling_tower_water.md"]
+    detection:
+      window_minutes: 30
+      min_participants: 2           # 2개 이상 기기에서 동반 신호 시 상관 incident
+      participants:
+        - device_type: COOLING_TOWER
+          signature:
+            - { sensor: temp_return, direction: up, min_change_abs: 3.0, unit: "°C", rationale: "냉각수 환수온도 상승(방열 불량)" }
+        - device_type: CHILLER
+          signature:
+            - { sensor: pressure,    direction: up, min_change_pct: 15, rationale: "응축압력 상승" }
+            - { sensor: temp_supply, direction: up, min_change_abs: 1.5, unit: "°C", rationale: "냉수 출구 설정 미달" }
+            - { sensor: current,     direction: up, min_change_pct: 10, rationale: "압축기 부하 상승" }
+            - { sensor: power,       direction: up, min_change_pct: 10, rationale: "소비전력 증가" }
+        - device_type: PUMP
+          signature:
+            - { sensor: airflow, direction: down, min_change_pct: 20, rationale: "냉각수 유량 부족" }
+    # 운전원에게 줄 조치 우선순위 (근본 원인부터)
+    action_priority:
+      - "1순위: 냉각탑/냉각수 계통 점검 (근본 원인) — 수질·살수·팬·스트레이너 차압"
+      - "2순위: 냉동기 부하 경감 — 응축압력·전류 모니터링, 필요 시 단계 감발"
+      - "3순위: 순환펌프 점검 — 유량·흡입측 막힘·캐비테이션"
+    severity: 오류                  # 복합 파급은 기본 오류 이상으로 취급
+    notes: >
+      검증 시나리오 C. CHILLER 단독 신호는 refrigerant_leak 과 겹칠 수 있으나,
+      COOLING_TOWER 환수온도 상승이 동반되면 근본 원인이 냉매가 아니라 냉각수 계통임을 가른다.
+      (감지기는 단일 고장 먼저 판정 후, 같은 창에서 다기기 동반이면 상관 시나리오로 승격.)

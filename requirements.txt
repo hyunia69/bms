@@ -1,0 +1,5 @@
+openai>=1.40        # T5: chat.completions.parse (구조화 출력) 필요
+httpx>=0.27
+python-dotenv>=1.0
+pyyaml>=6.0
+pydantic>=2         # T5: 답변 스키마 (Answer/RootCause/Citation)
