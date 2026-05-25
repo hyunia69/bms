@@ -44,7 +44,10 @@ def post_answer(req: AnswerRequest, x_api_token: str = Header(default="")) -> di
     query = (req.query or "").strip()
     if not query:
         raise HTTPException(status_code=422, detail="query is empty")
-    res = rag_answer.answer(query)
+    try:
+        res = rag_answer.answer(query)
+    except SystemExit as e:  # rag_answer 가 env 누락 시 sys.exit → uvicorn 워커 사망 방지
+        raise HTTPException(status_code=503, detail="RAG engine not configured (missing env vars)") from e
     res["slack_text"] = slack_format.format_slack(res)
     return res
 

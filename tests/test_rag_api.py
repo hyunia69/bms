@@ -46,3 +46,13 @@ def test_answer_empty_query_422(monkeypatch):
     r = client.post("/answer", json={"query": "   "},
                     headers={"X-API-Token": "secret"})
     assert r.status_code == 422
+
+
+def test_answer_engine_not_configured_503(monkeypatch):
+    monkeypatch.setattr(rag_api, "API_TOKEN", "secret")
+    def boom(q):
+        raise SystemExit("missing env")
+    monkeypatch.setattr(rag_api.rag_answer, "answer", boom)
+    r = client.post("/answer", json={"query": "필터 언제 갈아요?"},
+                    headers={"X-API-Token": "secret"})
+    assert r.status_code == 503
