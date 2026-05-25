@@ -10,6 +10,7 @@ from __future__ import annotations
 def format_slack(res: dict) -> str:
     if res.get("answer_type") == "no_basis":
         return _format_no_basis(res)
+    # no_basis 외 answer_type은 grounded로 처리 (현 계약: grounded | no_basis)
     return _format_grounded(res)
 
 
@@ -32,7 +33,7 @@ def _format_grounded(res: dict) -> str:
     if sources:
         lines.append("\n*출처*")
         for s in sources:
-            sim = float(s.get("similarity", 0.0))
+            sim = float(s.get("similarity") or 0.0)
             lines.append(
                 f"• {s.get('source', '?')} / {s.get('section', '?')} "
                 f"(유사도 {sim:.2f}) ※{s.get('origin', 'POC 생성 문서')}"

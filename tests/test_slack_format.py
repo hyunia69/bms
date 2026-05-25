@@ -23,6 +23,19 @@ def test_grounded_includes_summary_causes_checks_sources():
     assert "유사도 0.39" in out
 
 
+def test_grounded_handles_none_similarity():
+    res = {
+        "answer_type": "grounded",
+        "summary": "test",
+        "root_cause_candidates": [],
+        "recommended_checks": [],
+        "sources": [{"source": "doc.md", "section": "sec",
+                     "similarity": None, "origin": "POC 생성 문서"}],
+    }
+    out = format_slack(res)   # 크래시 안 해야 함
+    assert "유사도 0.00" in out
+
+
 def test_no_basis_shows_warning_and_checks_only():
     res = {
         "answer_type": "no_basis",
