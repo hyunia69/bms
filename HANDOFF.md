@@ -7,7 +7,7 @@
 **Last updated:** 2026-05-27 · **Branch:** main
 
 ## 현재 상태
-Phase-1의 **"pull"(운전원 질의 = 시나리오 B)** 경로가 코드부터 실제 Slack 왕복까지 완료. RAG 코어(스키마·인덱싱·검색 eval·답변 가드)와 Slack Q&A 봇(flow3)이 동작한다. 남은 Phase-1은 **"push"(자동 감지·알림 = 시나리오 A·C)** = 로그 시뮬레이터(T6) + 감지·알림(T8) + 주기 요약(T9). `rag_answer.py`는 처음부터 무수정 유지.
+Phase-1의 **"pull"(운전원 질의 = 시나리오 B)** 경로가 코드부터 실제 Slack 왕복까지 완료. RAG 코어(스키마·인덱싱·검색 eval·답변 가드)와 Slack Q&A 봇(flow3)이 동작한다. RAG 내부(임베딩→검색→LLM)는 별도 Activepieces 학습 플로우로 가시화 완료(결정5, `rag_answer.py` 무손상). 남은 Phase-1은 **"push"(자동 감지·알림 = 시나리오 A·C)** = 로그 시뮬레이터(T6) + 감지·알림(T8) + 주기 요약(T9). `rag_answer.py`는 처음부터 무수정 유지.
 
 ## 구현 현황 (설계 범위 대비)
 빌드 순서 기준. 상태는 커밋·eval·테스트 **증거로** 뒷받침한다(느낌 아님).
@@ -20,6 +20,7 @@ Phase-1의 **"pull"(운전원 질의 = 시나리오 B)** 경로가 코드부터 
 | T4 | 검색 eval(threshold·임베딩 모델 확정) | ✅ 완료 | `rag_eval.py` recall 100% |
 | T5 | 답변 가드 5종 | ✅ 완료 | `answer_eval.py` 12/12 |
 | T7 | flow3 Slack Q&A 봇 | ✅ 완료 | `pytest` 8/8 + 실제 Slack E2E |
+| T7-2 | RAG 가시화 학습 플로우(Activepieces 5노드) | ✅ 완료 | 노드3 유사도=`rag_answer` CLI 일치, 5노드 E2E 관찰 |
 | T6 | 로그 시뮬레이터(상관 고장 → raw_logs) | ⬜ 미착수 | raw_logs 0행 |
 | T8 | flow1 감지·알림(시나리오 A) | ⬜ 미착수 | incidents 0행 |
 | T9 | flow2 주기 요약·트렌드 | ⬜ 미착수 | analysis_results 0행 |
@@ -57,10 +58,10 @@ $env:PYTHONPATH=""; .venv\Scripts\python.exe -s scripts\rag_api.py         # uvi
 - **`rag_answer.py` 무수정** — flow3·API는 import만. answer_eval 12/12가 수학적으로 유지된다. 회귀 게이트 = `pytest` 8 + 필요 시 `answer_eval` 12.
 - 스키마 변경은 **마이그레이션 파일**로(대시보드 클릭 금지). seed·eval·threshold도 버전관리.
 
-## 다음 단계 (3 후보)
-1. **T7 2단계 — Activepieces 3노드 가시화**: flow의 단일 HTTP 노드를 임베딩 → `match_documents` → LLM → 가드로 펼쳐 RAG 내부 가시화(결정5). 가드가 단일 함수 내장이라 가시화/재구현 설계 필요.
-2. **T6 → T8 자동 감지(flow1, 시나리오 A)**: 시뮬레이터(상관 고장 → raw_logs) → 센서 추세 감지기 → incidents → 자동 Slack 알림. SoT = `fault_catalog.yaml`(준비됨). 신규 코드량 가장 큼.
-3. **보류 TODOS**: #22 실패 주입 테스트, #25 비RAG baseline 비교, 자격증명 하드닝.
+## 다음 단계 (2 후보)
+> T7 2단계(Activepieces RAG 가시화 학습 플로우)는 **완료**(2026-05-27). spec/plan = `docs/specs|plans/2026-05-27-t7-stage2-rag-visualization*`.
+1. **T6 → T8 자동 감지(flow1, 시나리오 A)**: 시뮬레이터(상관 고장 → raw_logs) → 센서 추세 감지기 → incidents → 자동 Slack 알림. SoT = `fault_catalog.yaml`(준비됨). 신규 코드량 가장 큼.
+2. **보류 TODOS**: #22 실패 주입 테스트, #25 비RAG baseline 비교, 자격증명 하드닝.
 
 ## 로컬 전용 히스토리 (참고)
 세션별 상세 결정·learnings는 `~/.gstack/projects/bms/`(checkpoints·timeline·learnings)에 있으나 **이 머신 로컬 전용**. 핵심은 ARCHITECTURE.md(결정)·이 문서(상태)로 git에 끌어왔다.
