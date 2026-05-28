@@ -1,0 +1,268 @@
+- generic [active] [ref=e6]:
+  - generic [ref=e1]:
+    - button "🌙" [ref=e2] [cursor=pointer]
+    - button "☀️" [ref=e3] [cursor=pointer]
+    - button "🌌" [ref=e4] [cursor=pointer]
+  - application [ref=e7]:
+    - generic:
+      - text: ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳
+      - generic:
+        - heading [level=2]: 벡터 검색 — 코사인 유사도 Top-K
+        - generic:
+          - generic:
+            - generic: 코사인 유사도
+            - img:
+              - generic: 질문
+              - generic: 청크A
+              - generic: 청크B
+              - generic: θ≈11°
+            - paragraph: θ 작을수록 유사
+          - generic:
+            - generic: BMS 실제 검색 결과 — "냉매가 새는 것 같아요"
+            - table:
+              - rowgroup:
+                - row:
+                  - columnheader: "#"
+                  - columnheader: 문서 / 섹션
+                  - columnheader: 유사도
+              - rowgroup:
+                - row:
+                  - cell: "1"
+                  - cell: P-1001 / 증상
+                  - cell: "0.391"
+                - row:
+                  - cell: "2"
+                  - cell: E-3002 / 가능한 원인
+                  - cell: "0.370"
+                - row:
+                  - cell: "3"
+                  - cell: M-2001 / 정기 점검 항목
+                  - cell: "0.367"
+                - row:
+                  - cell: "4"
+                  - cell: E-3002 / 즉각 조치
+                  - cell: "0.357"
+                - row:
+                  - cell: "5"
+                  - cell: P-1001 / 비고
+                  - cell: "0.354"
+        - paragraph:
+          - text: ↳ 질문은 "냉매가 새는"인데 1위가
+          - strong: P-1001(필터)
+          - text: — 키워드가 아니라
+          - strong: 의미(이상 증상 맥락)
+          - text: 로 찾기 때문. strict threshold 0.34 전부 통과 → E-3002도 포함.
+      - generic:
+        - heading [level=2]: 프롬프트 조립 + 생성 · 인용
+        - generic:
+          - generic:
+            - generic: 프롬프트 골격 (노드4 조립)
+            - generic:
+              - code: "{ \"messages\": [ { \"role\": \"system\", \"content\": \"주어진 청크만 근거로 답변하라.\" }, { \"role\": \"user\", \"content\": \"질문: 냉매가 새는 것 같아요\\n\\n[chunk_id=0] P-1001/증상: ...\\n[chunk_id=1] E-3002/가능한 원인: ...\\n[chunk_id=2] M-2001/정기 점검 항목: ...\\n[chunk_id=3] E-3002/즉각 조치: ...\\n[chunk_id=4] P-1001/비고: ...\" } ], \"model\": \"gpt-4o\", \"temperature\": 0 }"
+          - generic:
+            - generic:
+              - generic: LLM 선택 (BMS)
+              - paragraph:
+                - text: 검색 1위 P-1001(필터)이 아니라
+                - strong: E-3002(냉매) 청크를 근거로 선택
+                - text: . 질문 맥락에 맞는 문서를 LLM이 판단.
+            - generic:
+              - generic: 답변 구조
+              - paragraph: 원인 3개 (배관/플레어 누출 [chunk_id=1] · 냉매 충전량 부족 [chunk_id=1] · 증발기 코일 동결 [chunk_id=3]) + 점검 3개, 각 주장에 chunk_id 인용
+            - generic:
+              - paragraph: chunk_id 인용 = 환각 억제 + 출처 추적의 핵심. "어느 문서에 근거?" 를 답변에서 직접 확인 가능.
+      - generic [ref=e22]:
+        - heading "5노드 가시화 — RAG를 블랙박스로 두지 않는다" [level=2] [ref=e23]
+        - document [ref=e25]:
+          - generic [ref=e26]:
+            - generic [ref=e27]:
+              - generic [ref=e35]:
+                - generic [ref=e39]: 1536개 벡터
+                - generic [ref=e43]: 유사도 표 Top-5
+                - generic [ref=e47]: 프롬프트 JSON
+              - generic [ref=e48]:
+                - generic [ref=e54]:
+                  - text: Webhook
+                  - text: 질문 수신
+                - generic [ref=e60]:
+                  - text: HTTP 임베딩
+                  - text: OpenAI API
+                - generic [ref=e66]:
+                  - text: HTTP 검색
+                  - text: match_documents
+                - generic [ref=e72]:
+                  - text: Code 조립
+                  - text: 프롬프트 구성
+                - generic [ref=e78]:
+                  - text: HTTP LLM
+                  - text: gpt-4o
+            - generic [ref=e84]:
+              - generic [ref=e90]:
+                - text: Thought
+                - text: 생각 — 지금 무엇을 알아야 하는가
+              - generic [ref=e96]:
+                - text: Action
+                - text: 검색 / 계산 / 도구 호출
+              - generic [ref=e102]:
+                - text: Observation
+                - text: 결과 관찰
+              - generic [ref=e108]:
+                - text: 충분하면
+                - text: 최종 답변
+            - generic [ref=e109]:
+              - generic [ref=e116]:
+                - generic [ref=e120]: 예
+                - generic [ref=e124]: 아니오
+              - generic [ref=e125]:
+                - generic [ref=e130]: 질문
+                - generic [ref=e136]:
+                  - text: 임베딩
+                  - text: text-embedding-3-large
+                - generic [ref=e142]:
+                  - text: 검색
+                  - text: match_documents Top-5
+                - generic [ref=e148]:
+                  - text: LLM
+                  - text: gpt-4o
+                - generic [ref=e153]: 근거 충분?
+                - generic [ref=e158]: 답변 반환
+                - generic [ref=e164]:
+                  - text: 쿼리 재작성
+                  - text: LLM이 키워드 변환
+            - generic [ref=e165]:
+              - generic [ref=e172]:
+                - generic [ref=e176]: 증상
+                - generic [ref=e180]: 원인
+                - generic [ref=e184]: 원인
+                - generic [ref=e188]: 증상
+                - generic [ref=e192]: 점검
+                - generic [ref=e196]: 관련
+              - generic [ref=e197]:
+                - generic [ref=e202]: E-3002 냉매누출
+                - generic [ref=e207]: 저압
+                - generic [ref=e212]: 배관 누출
+                - generic [ref=e217]: 증발기 동결
+                - generic [ref=e222]: P-1001 필터막힘
+                - generic [ref=e227]: 풍량저하
+                - generic [ref=e232]: 필터 상태
+            - generic [ref=e233]:
+              - generic [ref=e234]:
+                - generic [ref=e238]: 유사 엔티티
+                - generic [ref=e242]: 관련 노드·엣지
+              - generic [ref=e243]:
+                - generic [ref=e248]: 질문
+                - generic [ref=e254]:
+                  - text: 벡터 검색
+                  - text: 진입 노드 탐색
+                - generic [ref=e260]:
+                  - text: 그래프 이웃 확장
+                  - text: 관계 따라 탐색
+                - generic [ref=e266]:
+                  - text: 컨텍스트 수집
+                  - text: 구조화된 사실
+                - generic [ref=e272]:
+                  - text: LLM
+                  - text: 답변 생성
+                - generic [ref=e277]: 답변 + 경로 인용
+        - generic [ref=e278]:
+          - generic [ref=e279]:
+            - strong [ref=e280]: 노드1
+            - text: 질문 텍스트
+          - generic [ref=e281]:
+            - strong [ref=e282]: 노드2
+            - text: "[-0.054, …] ×1536"
+          - generic [ref=e283]:
+            - strong [ref=e284]: 노드3
+            - text: 유사도 표
+            - text: "0.3704"
+          - generic [ref=e285]:
+            - strong [ref=e286]: 노드4
+            - text: 프롬프트 JSON
+          - generic [ref=e287]:
+            - strong [ref=e288]: 노드5
+            - text: 답변 + 인용
+        - paragraph [ref=e289]:
+          - text: ↳ Activepieces 캔버스에서 각 노드를 클릭하면
+          - strong [ref=e290]: 실제 중간 데이터
+          - text: 가 보인다.
+          - text: 노드3 유사도
+          - strong [ref=e291]: "0.3704"
+          - text: = CLI(rag_answer.py)
+          - strong [ref=e292]: "0.370"
+          - text: 일치 — 캔버스가 같은 RAG임 실증.
+      - generic:
+        - heading [level=2]: RAG의 안전장치
+        - paragraph: 검색됐다고 다 믿지 않는다.
+        - generic:
+          - generic:
+            - generic: ① threshold gate
+            - paragraph:
+              - text: strict
+              - strong: "0.34"
+              - text: → widen
+              - strong: "0.30"
+              - text: 그래도 없으면 →
+              - strong: 근거없음
+              - text: 반환. 유사도 낮은 청크는 버린다.
+          - generic:
+            - generic: ② 사후 가드 5종
+            - list:
+              - listitem: 가짜인용 = 0
+              - listitem: 인용 100% (청크에 없으면 탈락)
+              - listitem:
+                - strong: 제어지시 = 0
+              - listitem: 원인 후보 ≤ 3
+              - listitem: no_basis 일관성
+          - generic:
+            - generic: ③ 위반 시
+            - paragraph:
+              - text: 1회 재생성 시도. 그래도 위반 →
+              - strong: 근거없음
+              - text: 으로 교체. 답변이 나오지 않는 게 잘못된 답보다 낫다.
+        - paragraph:
+          - text: "↳ [BMS] 가시화 플로우는 happy path만(가드 미포함). 실제 봇에서 가드가 2차 방어. 예:"
+          - strong: "\"압축기를 멈추세요\""
+          - text: 같은 제어 지시 차단(제어지시0 = 0건 확인).
+        - generic: "— BMS POC answer_eval.py: 가드 불변식 12/12 PASS (control_bait 3건 전원 차단)"
+      - generic:
+        - heading [level=2]: Naive RAG — 한 방에 안 되면 끝
+        - paragraph: 검색 1번 → 생성 1번. 선형·고정 파이프라인.
+        - generic:
+          - generic:
+            - generic: 파이프라인
+            - generic:
+              - generic: 질문
+              - generic: →
+              - generic: 임베딩
+              - generic: →
+              - generic: 검색
+              - generic: →
+              - generic: 생성
+            - generic:
+              - generic: ✗ 검색 실패해도 재시도 없음
+              - generic: ✗ 쿼리 고정 — 재작성 없음
+              - generic: ✗ 검색은 코드가 한 번만 실행
+          - generic:
+            - generic:
+              - generic: 모호한 질문
+              - paragraph: "\"이상해요\" → 어떤 청크가 Top-1인지 운에 맡김"
+            - generic:
+              - generic: 다단계 추론
+              - paragraph: 여러 문서를 종합해야 하는 질문은 검색 1회로 커버 불가
+            - generic:
+              - generic: 검색 실패 시 복구 없음
+              - paragraph: 관련 청크가 threshold 아래면 그대로 "근거없음" 반환
+        - paragraph:
+          - text: ↳ [BMS] 발표자의 5노드 플로우 —
+          - code: Webhook → 임베딩 → 검색 → 조립 → LLM
+          - text: — 정확히 이 Naive RAG. 가드(환각 0·제어지시 0)로 보강했지만,
+          - strong: 재검색·쿼리 재작성 없음
+          - text: .
+      - text: ↳ ↳ ↳ ↳ ↳ ↳
+    - link "74 / 87" [ref=e295] [cursor=pointer]:
+      - /url: "#/rag-viz"
+    - complementary:
+      - button "previous slide" [ref=e296] [cursor=pointer]
+      - button "next slide" [ref=e18] [cursor=pointer]
+    - text: Speaker notes
+    - generic [ref=e21]: "5노드 가시화 — RAG를 블랙박스로 두지 않는다 #mermaid-1779861092544{font-family:Pretendard,sans-serif;font-size:16px;fill:#ccc;}#mermaid-1779861092544 .error-icon{fill:#a44141;}#mermaid-1779861092544 .error-text{fill:#ddd;stroke:#ddd;}#mermaid-1779861092544 .edge-thickness-normal{stroke-width:2px;}#mermaid-1779861092544 .edge-thickness-thick{stroke-width:3.5px;}#mermaid-1779861092544 .edge-pattern-solid{stroke-dasharray:0;}#mermaid-1779861092544 .edge-pattern-dashed{stroke-dasharray:3;}#mermaid-1779861092544 .edge-pattern-dotted{stroke-dasharray:2;}#mermaid-1779861092544 .marker{fill:lightgrey;stroke:lightgrey;}#mermaid-1779861092544 .marker.cross{stroke:lightgrey;}#mermaid-1779861092544 svg{font-family:Pretendard,sans-serif;font-size:16px;}#mermaid-1779861092544 .label{font-family:Pretendard,sans-serif;color:#ccc;}#mermaid-1779861092544 .cluster-label text{fill:#F9FFFE;}#mermaid-1779861092544 .cluster-label span,#mermaid-1779861092544 p{color:#F9FFFE;}#mermaid-1779861092544 .label text,#mermaid-1779861092544 span,#mermaid-1779861092544 p{fill:#ccc;color:#ccc;}#mermaid-1779861092544 .node rect,#mermaid-1779861092544 .node circle,#mermaid-1779861092544 .node ellipse,#mermaid-1779861092544 .node polygon,#mermaid-1779861092544 .node path{fill:#1f2020;stroke:#81B1DB;stroke-width:1px;}#mermaid-1779861092544 .flowchart-label text{text-anchor:middle;}#mermaid-1779861092544 .node .katex path{fill:#000;stroke:#000;stroke-width:1px;}#mermaid-1779861092544 .node .label{text-align:center;}#mermaid-1779861092544 .node.clickable{cursor:pointer;}#mermaid-1779861092544 .arrowheadPath{fill:lightgrey;}#mermaid-1779861092544 .edgePath .path{stroke:lightgrey;stroke-width:2.0px;}#mermaid-1779861092544 .flowchart-link{stroke:lightgrey;fill:none;}#mermaid-1779861092544 .edgeLabel{background-color:hsl(0, 0%, 34.4117647059%);text-align:center;}#mermaid-1779861092544 .edgeLabel rect{opacity:0.5;background-color:hsl(0, 0%, 34.4117647059%);fill:hsl(0, 0%, 34.4117647059%);}#mermaid-1779861092544 .labelBkg{background-color:rgba(87.75, 87.75, 87.75, 0.5);}#mermaid-1779861092544 .cluster rect{fill:hsl(180, 1.5873015873%, 28.3529411765%);stroke:rgba(255, 255, 255, 0.25);stroke-width:1px;}#mermaid-1779861092544 .cluster text{fill:#F9FFFE;}#mermaid-1779861092544 .cluster span,#mermaid-1779861092544 p{color:#F9FFFE;}#mermaid-1779861092544 div.mermaidTooltip{position:absolute;text-align:center;max-width:200px;padding:2px;font-family:Pretendard,sans-serif;font-size:12px;background:hsl(20, 1.5873015873%, 12.3529411765%);border:1px solid rgba(255, 255, 255, 0.25);border-radius:2px;pointer-events:none;z-index:100;}#mermaid-1779861092544 .flowchartTitleText{text-anchor:middle;font-size:18px;fill:#ccc;}#mermaid-1779861092544 :root{--mermaid-font-family:\"trebuchet ms\",verdana,arial,sans-serif;} 1536개 벡터 유사도 표 Top-5 프롬프트 JSON Webhook 질문 수신 HTTP 임베딩 OpenAI API HTTP 검색 match_documents Code 조립 프롬프트 구성 HTTP LLM gpt-4o Thought 생각 — 지금 무엇을 알아야 하는가 Action 검색 / 계산 / 도구 호출 Observation 결과 관찰 충분하면 최종 답변 예 아니오 질문 임베딩 text-embedding-3-large 검색 match_documents Top-5 LLM gpt-4o 근거 충분? 답변 반환 쿼리 재작성 LLM이 키워드 변환 증상 원인 원인 증상 점검 관련 E-3002 냉매누출 저압 배관 누출 증발기 동결 P-1001 필터막힘 풍량저하 필터 상태 유사 엔티티 관련 노드·엣지 질문 벡터 검색 진입 노드 탐색 그래프 이웃 확장 관계 따라 탐색 컨텍스트 수집 구조화된 사실 LLM 답변 생성 답변 + 경로 인용 노드1 질문 텍스트 노드2 [-0.054, …] ×1536 노드3 유사도 표 0.3704 노드4 프롬프트 JSON 노드5 답변 + 인용 Activepieces 캔버스에서 각 노드를 클릭하면 실제 중간 데이터 가 보인다. 노드3 유사도 0.3704 = CLI(rag_answer.py) 0.370 일치 — 캔버스가 같은 RAG임 실증."

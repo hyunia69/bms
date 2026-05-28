@@ -1,0 +1,170 @@
+- generic [active] [ref=e6]:
+  - generic [ref=e1]:
+    - button "🌙" [ref=e2] [cursor=pointer]
+    - button "☀️" [ref=e3] [cursor=pointer]
+    - button "🌌" [ref=e4] [cursor=pointer]
+  - application [ref=e7]:
+    - generic:
+      - text: ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳
+      - generic:
+        - heading [level=2]: Naive RAG — 한 방에 안 되면 끝
+        - paragraph: 검색 1번 → 생성 1번. 선형·고정 파이프라인.
+        - generic:
+          - generic:
+            - generic: 파이프라인
+            - generic:
+              - generic: 질문
+              - generic: →
+              - generic: 임베딩
+              - generic: →
+              - generic: 검색
+              - generic: →
+              - generic: 생성
+            - generic:
+              - generic: ✗ 검색 실패해도 재시도 없음
+              - generic: ✗ 쿼리 고정 — 재작성 없음
+              - generic: ✗ 검색은 코드가 한 번만 실행
+          - generic:
+            - generic:
+              - generic: 모호한 질문
+              - paragraph: "\"이상해요\" → 어떤 청크가 Top-1인지 운에 맡김"
+            - generic:
+              - generic: 다단계 추론
+              - paragraph: 여러 문서를 종합해야 하는 질문은 검색 1회로 커버 불가
+            - generic:
+              - generic: 검색 실패 시 복구 없음
+              - paragraph: 관련 청크가 threshold 아래면 그대로 "근거없음" 반환
+        - paragraph:
+          - text: ↳ [BMS] 발표자의 5노드 플로우 —
+          - code: Webhook → 임베딩 → 검색 → 조립 → LLM
+          - text: — 정확히 이 Naive RAG. 가드(환각 0·제어지시 0)로 보강했지만,
+          - strong: 재검색·쿼리 재작성 없음
+          - text: .
+      - generic:
+        - heading [level=2]: Agentic RAG — LLM이 루프를 제어한다
+        - paragraph:
+          - text: 검색을
+          - emphasis: 코드가 시키냐
+          - text: ", LLM이 시키냐의 차이"
+        - generic:
+          - generic:
+            - generic: Naive — 코드가 제어
+            - paragraph: 고정 파이프라인. 검색은 코드가 한 번 실행. LLM은 생성만 담당.
+            - generic: 질문 → 검색 → LLM → 답변 (끝)
+          - generic:
+            - generic: Agentic — LLM이 제어
+            - paragraph: LLM이 스스로 판단. 필요하면 재검색. 쿼리를 재작성하거나 도구를 호출.
+            - generic: 질문 → LLM → [검색?/재작성?/충분?] → 루프
+        - generic:
+          - generic:
+            - generic: 판단
+            - paragraph: 지금 근거가 충분한가? 더 검색해야 하는가?
+          - generic:
+            - generic: 재검색
+            - paragraph: 결과가 약하면 다른 키워드로 다시 벡터 DB를 조회
+          - generic:
+            - generic: 쿼리 재작성
+            - paragraph: 원래 질문을 검색에 유리한 형태로 LLM이 변환
+        - paragraph: 비용↑ · 지연↑ / 대신 모호한 질문·복합 추론에 대응 가능
+      - generic [ref=e115]:
+        - heading "ReAct 패턴 — 생각하고 행동하고 관찰한다" [level=2] [ref=e116]
+        - paragraph [ref=e117]:
+          - strong [ref=e118]: Re
+          - text: asoning +
+          - strong [ref=e119]: Act
+          - text: ion 교차 — Agentic RAG의 대표 루프
+        - generic [ref=e120]:
+          - generic [ref=e122]:
+            - generic [ref=e123]:
+              - generic [ref=e124]: Thought
+              - generic [ref=e125]: 생각 — 지금 무엇을 알아야 하는가
+            - generic [ref=e126]: ↓
+            - generic [ref=e127]:
+              - generic [ref=e128]: Action
+              - generic [ref=e129]: 검색 / 계산 / 도구 호출
+            - generic [ref=e130]: ↓
+            - generic [ref=e131]:
+              - generic [ref=e132]: Observation
+              - generic [ref=e133]: 결과 관찰
+            - generic [ref=e134]: ↓
+            - generic [ref=e136]: 충분하면 최종 답변
+          - generic [ref=e141]:
+            - generic [ref=e142]:
+              - generic [ref=e143]: Thought (생각)
+              - paragraph [ref=e144]: LLM이 현재 상태를 추론. "냉매 정보가 필요하다."
+            - generic [ref=e145]:
+              - generic [ref=e146]: Action (행동)
+              - paragraph [ref=e147]:
+                - text: 도구 호출.
+                - code [ref=e148]: search("냉매 누출 증상")
+            - generic [ref=e149]:
+              - generic [ref=e150]: Observation (관찰)
+              - paragraph [ref=e151]: 검색 결과를 LLM에 피드백. 다음 Thought의 입력이 됨.
+            - generic [ref=e152]:
+              - generic [ref=e153]: 루프 탈출 조건
+              - paragraph [ref=e154]: "\"근거 충분\" 판단 또는 최대 스텝 도달 (무한루프 방지 필수)"
+        - generic [ref=e155]: "— Yao et al., ReAct: Synergizing Reasoning and Acting in Language Models (2022)"
+      - generic:
+        - heading [level=2]: LangChain · LangGraph — 코드로 짜는 Agentic RAG
+        - paragraph: 같은 그래프 개념 — 코드(LangGraph) vs 캔버스(Activepieces)
+        - generic:
+          - generic:
+            - generic: LangChain — 체인 추상
+            - paragraph: Retriever · Prompt · LLM · Parser를 체인으로 연결하는 고수준 추상. 단순 선형 파이프라인에 빠름.
+            - generic: "chain = retriever | prompt | llm | parser chain.invoke({\"question\": \"...\"})"
+          - generic:
+            - generic: LangGraph — 상태 그래프
+            - paragraph: 노드 + 엣지 + 상태(State). 분기·루프·재시도를 그래프로 정의. Agentic RAG, ReAct 루프 구현에 적합.
+            - generic: graph.add_node("retrieve", retrieve_fn) graph.add_edge("retrieve", "grade") graph.add_conditional_edges(...)
+        - paragraph:
+          - text: ↳ [BMS] 발표자의 Activepieces는 노코드 오케스트레이션 — LangGraph가 코드로 그리는 그래프를 캔버스로 가시화한 것.
+          - strong: 가시화·학습 목적엔 노코드가 직관적.
+        - generic: — LangChain / LangGraph 공식 문서 (langchain.com · langchain-ai.github.io/langgraph)
+      - generic:
+        - heading [level=2]: 내 플로우를 에이전틱하게 확장하면?
+        - paragraph: 5노드 Naive에 판단 노드 하나를 추가하면 루프가 생긴다
+        - generic:
+          - generic:
+            - generic: 질문
+            - generic: →
+            - generic:
+              - generic: 임베딩
+              - generic: text-embedding-3-large
+            - generic: →
+            - generic:
+              - generic: 검색
+              - generic: match_documents Top-5
+            - generic: →
+            - generic:
+              - generic: LLM
+              - generic: gpt-4o
+            - generic: →
+            - generic:
+              - generic: 근거 충분?
+            - generic:
+              - generic: 예
+              - generic: →
+            - generic: 답변 반환
+            - generic:
+              - generic: 아니오
+            - generic:
+              - generic: 쿼리 재작성
+              - generic: LLM이 키워드 변환
+        - generic:
+          - generic:
+            - generic: 현재 (Naive)
+            - paragraph: J(판단) 노드 없음. 검색 결과 부족하면 "근거없음" 반환. 가드 5종이 2차 방어선.
+          - generic:
+            - generic: 확장 시
+            - paragraph:
+              - text: "\"냉매 누출 + 필터 막힘\" 복합 질문에 재검색 가능. 단, 비용↑·지연↑·"
+              - strong: 무한루프 가드 필수
+              - text: .
+      - text: ↳ ↳ ↳ ↳ ↳
+    - link "78 / 87" [ref=e156] [cursor=pointer]:
+      - /url: "#/rag-react"
+    - complementary:
+      - button "previous slide" [ref=e108] [cursor=pointer]
+      - button "next slide" [ref=e110] [cursor=pointer]
+    - text: Speaker notes
+    - generic [ref=e114]: "지식 그래프 엔티티(노드) + 관계(엣지)로 지식을 구조화한다. #mermaid-1779924391995{font-family:Pretendard,sans-serif;font-size:20px;fill:#ccc;}#mermaid-1779924391995 .error-icon{fill:#a44141;}#mermaid-1779924391995 .error-text{fill:#ddd;stroke:#ddd;}#mermaid-1779924391995 .edge-thickness-normal{stroke-width:2px;}#mermaid-1779924391995 .edge-thickness-thick{stroke-width:3.5px;}#mermaid-1779924391995 .edge-pattern-solid{stroke-dasharray:0;}#mermaid-1779924391995 .edge-pattern-dashed{stroke-dasharray:3;}#mermaid-1779924391995 .edge-pattern-dotted{stroke-dasharray:2;}#mermaid-1779924391995 .marker{fill:lightgrey;stroke:lightgrey;}#mermaid-1779924391995 .marker.cross{stroke:lightgrey;}#mermaid-1779924391995 svg{font-family:Pretendard,sans-serif;font-size:20px;}#mermaid-1779924391995 .label{font-family:Pretendard,sans-serif;color:#ccc;}#mermaid-1779924391995 .cluster-label text{fill:#F9FFFE;}#mermaid-1779924391995 .cluster-label span,#mermaid-1779924391995 p{color:#F9FFFE;}#mermaid-1779924391995 .label text,#mermaid-1779924391995 span,#mermaid-1779924391995 p{fill:#ccc;color:#ccc;}#mermaid-1779924391995 .node rect,#mermaid-1779924391995 .node circle,#mermaid-1779924391995 .node ellipse,#mermaid-1779924391995 .node polygon,#mermaid-1779924391995 .node path{fill:#1f2020;stroke:#81B1DB;stroke-width:1px;}#mermaid-1779924391995 .flowchart-label text{text-anchor:middle;}#mermaid-1779924391995 .node .katex path{fill:#000;stroke:#000;stroke-width:1px;}#mermaid-1779924391995 .node .label{text-align:center;}#mermaid-1779924391995 .node.clickable{cursor:pointer;}#mermaid-1779924391995 .arrowheadPath{fill:lightgrey;}#mermaid-1779924391995 .edgePath .path{stroke:lightgrey;stroke-width:2.0px;}#mermaid-1779924391995 .flowchart-link{stroke:lightgrey;fill:none;}#mermaid-1779924391995 .edgeLabel{background-color:hsl(0, 0%, 34.4117647059%);text-align:center;}#mermaid-1779924391995 .edgeLabel rect{opacity:0.5;background-color:hsl(0, 0%, 34.4117647059%);fill:hsl(0, 0%, 34.4117647059%);}#mermaid-1779924391995 .labelBkg{background-color:rgba(87.75, 87.75, 87.75, 0.5);}#mermaid-1779924391995 .cluster rect{fill:hsl(180, 1.5873015873%, 28.3529411765%);stroke:rgba(255, 255, 255, 0.25);stroke-width:1px;}#mermaid-1779924391995 .cluster text{fill:#F9FFFE;}#mermaid-1779924391995 .cluster span,#mermaid-1779924391995 p{color:#F9FFFE;}#mermaid-1779924391995 div.mermaidTooltip{position:absolute;text-align:center;max-width:200px;padding:2px;font-family:Pretendard,sans-serif;font-size:12px;background:hsl(20, 1.5873015873%, 12.3529411765%);border:1px solid rgba(255, 255, 255, 0.25);border-radius:2px;pointer-events:none;z-index:100;}#mermaid-1779924391995 .flowchartTitleText{text-anchor:middle;font-size:18px;fill:#ccc;}#mermaid-1779924391995 :root{--mermaid-font-family:\"trebuchet ms\",verdana,arial,sans-serif;} 증상 원인 원인 증상 점검 관련 E-3002 냉매누출 저압 배관 누출 증발기 동결 P-1001 필터막힘 풍량저하 필터 상태 지식 그래프 구성요소 노드 E-3002, P-1001, 저압, 배관 누출 … 엣지 증상 / 원인 / 점검 / 관련 탐색 노드 → 이웃 → 이웃의 이웃 [BMS] fault_catalog.yaml 의 고장–증상–원인 구조가 사실상 이 그래프 — 지금은 벡터로만 쓰고 있다. \"FREEZE → 점검 → FILTER\"와 \"P-1001 → 관련 → FILTER\" 이 연결은 청크 유사도로는 도출 불가 — 관계 정의가 필요하다."

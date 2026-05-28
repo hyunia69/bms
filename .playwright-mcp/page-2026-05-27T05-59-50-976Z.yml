@@ -1,0 +1,135 @@
+- generic [active] [ref=e6]:
+  - generic [ref=e1]:
+    - button "🌙" [ref=e2] [cursor=pointer]
+    - button "☀️" [ref=e3] [cursor=pointer]
+    - button "🌌" [ref=e4] [cursor=pointer]
+  - application [ref=e7]:
+    - generic:
+      - text: ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳
+      - generic [ref=e22]:
+        - heading "5노드 가시화 — RAG를 블랙박스로 두지 않는다" [level=2] [ref=e23]
+        - document [ref=e25]:
+          - generic [ref=e26]:
+            - generic [ref=e27]:
+              - generic [ref=e35]:
+                - generic [ref=e39]: 1536개 벡터
+                - generic [ref=e43]: 유사도 표 Top-5
+                - generic [ref=e47]: 프롬프트 JSON
+              - generic [ref=e48]:
+                - generic [ref=e54]:
+                  - text: Webhook
+                  - text: 질문 수신
+                - generic [ref=e60]:
+                  - text: HTTP 임베딩
+                  - text: OpenAI API
+                - generic [ref=e66]:
+                  - text: HTTP 검색
+                  - text: match_documents
+                - generic [ref=e72]:
+                  - text: Code 조립
+                  - text: 프롬프트 구성
+                - generic [ref=e78]:
+                  - text: HTTP LLM
+                  - text: gpt-4o
+            - generic [ref=e84]:
+              - generic [ref=e90]:
+                - text: Thought
+                - text: 생각 — 지금 무엇을 알아야 하는가
+              - generic [ref=e96]:
+                - text: Action
+                - text: 검색 / 계산 / 도구 호출
+              - generic [ref=e102]:
+                - text: Observation
+                - text: 결과 관찰
+              - generic [ref=e108]:
+                - text: 충분하면
+                - text: 최종 답변
+            - generic [ref=e109]:
+              - generic [ref=e116]:
+                - generic [ref=e120]: 예
+                - generic [ref=e124]: 아니오
+              - generic [ref=e125]:
+                - generic [ref=e130]: 질문
+                - generic [ref=e136]:
+                  - text: 임베딩
+                  - text: text-embedding-3-large
+                - generic [ref=e142]:
+                  - text: 검색
+                  - text: match_documents Top-5
+                - generic [ref=e148]:
+                  - text: LLM
+                  - text: gpt-4o
+                - generic [ref=e153]: 근거 충분?
+                - generic [ref=e158]: 답변 반환
+                - generic [ref=e164]:
+                  - text: 쿼리 재작성
+                  - text: LLM이 키워드 변환
+            - generic [ref=e165]:
+              - generic [ref=e172]:
+                - generic [ref=e176]: 증상
+                - generic [ref=e180]: 원인
+                - generic [ref=e184]: 원인
+                - generic [ref=e188]: 증상
+                - generic [ref=e192]: 점검
+                - generic [ref=e196]: 관련
+              - generic [ref=e197]:
+                - generic [ref=e202]: E-3002 냉매누출
+                - generic [ref=e207]: 저압
+                - generic [ref=e212]: 배관 누출
+                - generic [ref=e217]: 증발기 동결
+                - generic [ref=e222]: P-1001 필터막힘
+                - generic [ref=e227]: 풍량저하
+                - generic [ref=e232]: 필터 상태
+            - generic [ref=e233]:
+              - generic [ref=e234]:
+                - generic [ref=e238]: 유사 엔티티
+                - generic [ref=e242]: 관련 노드·엣지
+              - generic [ref=e243]:
+                - generic [ref=e248]: 질문
+                - generic [ref=e254]:
+                  - text: 벡터 검색
+                  - text: 진입 노드 탐색
+                - generic [ref=e260]:
+                  - text: 그래프 이웃 확장
+                  - text: 관계 따라 탐색
+                - generic [ref=e266]:
+                  - text: 컨텍스트 수집
+                  - text: 구조화된 사실
+                - generic [ref=e272]:
+                  - text: LLM
+                  - text: 답변 생성
+                - generic [ref=e277]: 답변 + 경로 인용
+        - generic [ref=e278]:
+          - generic [ref=e279]:
+            - strong [ref=e280]: 노드1
+            - text: 질문 텍스트
+          - generic [ref=e281]:
+            - strong [ref=e282]: 노드2
+            - text: "[-0.054, …] ×1536"
+          - generic [ref=e283]:
+            - strong [ref=e284]: 노드3
+            - text: 유사도 표
+            - text: "0.3704"
+          - generic [ref=e285]:
+            - strong [ref=e286]: 노드4
+            - text: 프롬프트 JSON
+          - generic [ref=e287]:
+            - strong [ref=e288]: 노드5
+            - text: 답변 + 인용
+        - paragraph [ref=e289]:
+          - text: ↳ Activepieces 캔버스에서 각 노드를 클릭하면
+          - strong [ref=e290]: 실제 중간 데이터
+          - text: 가 보인다.
+          - text: 노드3 유사도
+          - strong [ref=e291]: "0.3704"
+          - text: = CLI(rag_answer.py)
+          - strong [ref=e292]: "0.370"
+          - text: 일치 — 캔버스가 같은 RAG임 실증.
+      - text: ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳
+    - link "74 / 87" [ref=e301] [cursor=pointer]:
+      - /url: "#/rag-viz"
+    - complementary:
+      - button "previous slide" [ref=e296] [cursor=pointer]
+      - button "next slide" [ref=e18] [cursor=pointer]
+    - text: Speaker notes
+    - generic [ref=e21]: "5노드 가시화 — RAG를 블랙박스로 두지 않는다 #mermaid-1779861092544{font-family:Pretendard,sans-serif;font-size:16px;fill:#ccc;}#mermaid-1779861092544 .error-icon{fill:#a44141;}#mermaid-1779861092544 .error-text{fill:#ddd;stroke:#ddd;}#mermaid-1779861092544 .edge-thickness-normal{stroke-width:2px;}#mermaid-1779861092544 .edge-thickness-thick{stroke-width:3.5px;}#mermaid-1779861092544 .edge-pattern-solid{stroke-dasharray:0;}#mermaid-1779861092544 .edge-pattern-dashed{stroke-dasharray:3;}#mermaid-1779861092544 .edge-pattern-dotted{stroke-dasharray:2;}#mermaid-1779861092544 .marker{fill:lightgrey;stroke:lightgrey;}#mermaid-1779861092544 .marker.cross{stroke:lightgrey;}#mermaid-1779861092544 svg{font-family:Pretendard,sans-serif;font-size:16px;}#mermaid-1779861092544 .label{font-family:Pretendard,sans-serif;color:#ccc;}#mermaid-1779861092544 .cluster-label text{fill:#F9FFFE;}#mermaid-1779861092544 .cluster-label span,#mermaid-1779861092544 p{color:#F9FFFE;}#mermaid-1779861092544 .label text,#mermaid-1779861092544 span,#mermaid-1779861092544 p{fill:#ccc;color:#ccc;}#mermaid-1779861092544 .node rect,#mermaid-1779861092544 .node circle,#mermaid-1779861092544 .node ellipse,#mermaid-1779861092544 .node polygon,#mermaid-1779861092544 .node path{fill:#1f2020;stroke:#81B1DB;stroke-width:1px;}#mermaid-1779861092544 .flowchart-label text{text-anchor:middle;}#mermaid-1779861092544 .node .katex path{fill:#000;stroke:#000;stroke-width:1px;}#mermaid-1779861092544 .node .label{text-align:center;}#mermaid-1779861092544 .node.clickable{cursor:pointer;}#mermaid-1779861092544 .arrowheadPath{fill:lightgrey;}#mermaid-1779861092544 .edgePath .path{stroke:lightgrey;stroke-width:2.0px;}#mermaid-1779861092544 .flowchart-link{stroke:lightgrey;fill:none;}#mermaid-1779861092544 .edgeLabel{background-color:hsl(0, 0%, 34.4117647059%);text-align:center;}#mermaid-1779861092544 .edgeLabel rect{opacity:0.5;background-color:hsl(0, 0%, 34.4117647059%);fill:hsl(0, 0%, 34.4117647059%);}#mermaid-1779861092544 .labelBkg{background-color:rgba(87.75, 87.75, 87.75, 0.5);}#mermaid-1779861092544 .cluster rect{fill:hsl(180, 1.5873015873%, 28.3529411765%);stroke:rgba(255, 255, 255, 0.25);stroke-width:1px;}#mermaid-1779861092544 .cluster text{fill:#F9FFFE;}#mermaid-1779861092544 .cluster span,#mermaid-1779861092544 p{color:#F9FFFE;}#mermaid-1779861092544 div.mermaidTooltip{position:absolute;text-align:center;max-width:200px;padding:2px;font-family:Pretendard,sans-serif;font-size:12px;background:hsl(20, 1.5873015873%, 12.3529411765%);border:1px solid rgba(255, 255, 255, 0.25);border-radius:2px;pointer-events:none;z-index:100;}#mermaid-1779861092544 .flowchartTitleText{text-anchor:middle;font-size:18px;fill:#ccc;}#mermaid-1779861092544 :root{--mermaid-font-family:\"trebuchet ms\",verdana,arial,sans-serif;} 1536개 벡터 유사도 표 Top-5 프롬프트 JSON Webhook 질문 수신 HTTP 임베딩 OpenAI API HTTP 검색 match_documents Code 조립 프롬프트 구성 HTTP LLM gpt-4o Thought 생각 — 지금 무엇을 알아야 하는가 Action 검색 / 계산 / 도구 호출 Observation 결과 관찰 충분하면 최종 답변 예 아니오 질문 임베딩 text-embedding-3-large 검색 match_documents Top-5 LLM gpt-4o 근거 충분? 답변 반환 쿼리 재작성 LLM이 키워드 변환 증상 원인 원인 증상 점검 관련 E-3002 냉매누출 저압 배관 누출 증발기 동결 P-1001 필터막힘 풍량저하 필터 상태 유사 엔티티 관련 노드·엣지 질문 벡터 검색 진입 노드 탐색 그래프 이웃 확장 관계 따라 탐색 컨텍스트 수집 구조화된 사실 LLM 답변 생성 답변 + 경로 인용 노드1 질문 텍스트 노드2 [-0.054, …] ×1536 노드3 유사도 표 0.3704 노드4 프롬프트 JSON 노드5 답변 + 인용 Activepieces 캔버스에서 각 노드를 클릭하면 실제 중간 데이터 가 보인다. 노드3 유사도 0.3704 = CLI(rag_answer.py) 0.370 일치 — 캔버스가 같은 RAG임 실증."

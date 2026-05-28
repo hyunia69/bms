@@ -1,0 +1,259 @@
+- generic [active] [ref=e6]:
+  - generic [ref=e1]:
+    - button "🌙" [ref=e2] [cursor=pointer]
+    - button "☀️" [ref=e3] [cursor=pointer]
+    - button "🌌" [ref=e4] [cursor=pointer]
+  - application [ref=e7]:
+    - generic:
+      - text: ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳
+      - generic:
+        - heading [level=2]: 벡터 검색의 한계
+        - paragraph:
+          - text: "\"비슷한\"은 잘 찾는다."
+          - strong: 관계·다단계 추론
+          - text: 은 다른 문제다.
+        - generic:
+          - generic:
+            - generic: ✗ 다홉 질문
+            - paragraph: "\"E-3002가 발생했을 때 점검해야 할 부품이 P-1001과 겹치나?\" 두 고장 코드를 동시에 추적해야 — 청크 유사도로 답이 나오지 않는다."
+          - generic:
+            - generic: ✗ 엔티티 간 관계
+            - paragraph: "\"냉매 누출과 필터 막힘의 공통 원인은?\" 각 고장의 원인 노드를 연결해야 — 유사도 점수는 관계를 표현하지 않는다."
+          - generic:
+            - generic: ✗ 전체 집계·요약
+            - paragraph: "\"이 달에 발생한 고장 유형을 모두 정리해줘\" 전체 범위의 일관된 탐색이 필요 — Top-K 검색은 전체를 보장하지 않는다."
+        - paragraph:
+          - text: ↳ 벡터 검색은
+          - strong: "\"유사도\""
+          - text: 다.
+          - strong: "\"추론\""
+          - text: 이 아니다. 답에 관계가 필요한 순간, 구조가 필요해진다.
+      - generic:
+        - heading [level=2]: 지식 그래프
+        - paragraph: 엔티티(노드) + 관계(엣지)로 지식을 구조화한다.
+        - generic:
+          - generic:
+            - document:
+              - generic:
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic: 증상
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic: 원인
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic: 원인
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic: 증상
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic: 점검
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic: 관련
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic: E-3002 냉매누출
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic: 저압
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic: 배관 누출
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic: 증발기 동결
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic: P-1001 필터막힘
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic: 풍량저하
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic: 필터 상태
+          - generic:
+            - generic:
+              - generic: 지식 그래프 구성요소
+              - table:
+                - rowgroup:
+                  - row:
+                    - cell: 노드
+                    - cell: E-3002, P-1001, 저압, 배관 누출 …
+                  - row:
+                    - cell: 엣지
+                    - cell: 증상 / 원인 / 점검 / 관련
+                  - row:
+                    - cell: 탐색
+                    - cell: 노드 → 이웃 → 이웃의 이웃
+            - paragraph:
+              - text: ↳ [BMS]
+              - code: fault_catalog.yaml
+              - text: 의 고장–증상–원인 구조가 사실상 이 그래프 — 지금은
+              - strong: 벡터로만
+              - text: 쓰고 있다.
+            - generic:
+              - paragraph:
+                - text: "\"FREEZE → 점검 → FILTER\"와 \"P-1001 → 관련 → FILTER\" 이 연결은"
+                - strong: 청크 유사도로는 도출 불가
+                - text: — 관계 정의가 필요하다.
+      - generic [ref=e246]:
+        - heading "Graph RAG" [level=2] [ref=e247]
+        - paragraph [ref=e248]: 진입은 벡터, 확장은 그래프.
+        - generic [ref=e249]:
+          - generic [ref=e250]: 질문
+          - generic [ref=e251]: →
+          - generic [ref=e252]:
+            - generic [ref=e253]: 벡터 검색
+            - generic [ref=e254]: 진입 노드 탐색
+          - generic [ref=e255]:
+            - generic [ref=e256]: →
+            - generic [ref=e257]: 유사 엔티티
+          - generic [ref=e258]:
+            - generic [ref=e259]: 그래프 이웃 확장
+            - generic [ref=e260]: 관계 따라 탐색
+          - generic [ref=e261]:
+            - generic [ref=e262]: →
+            - generic [ref=e263]: 관련 노드·엣지
+          - generic [ref=e264]:
+            - generic [ref=e265]: 컨텍스트 수집
+            - generic [ref=e266]: 구조화된 사실
+          - generic [ref=e267]: →
+          - generic [ref=e268]:
+            - generic [ref=e269]: LLM
+            - generic [ref=e270]: 답변 생성
+          - generic [ref=e271]: →
+          - generic [ref=e272]:
+            - generic [ref=e273]: 답변
+            - generic [ref=e274]: + 경로 인용
+        - generic [ref=e275]:
+          - generic [ref=e276]:
+            - generic [ref=e277]: 강점
+            - list [ref=e278]:
+              - listitem [ref=e279]: 다홉 관계 추론
+              - listitem [ref=e280]: 집계·요약 질문
+              - listitem [ref=e281]: 엔티티 중심 탐색
+          - generic [ref=e282]:
+            - generic [ref=e283]: 비용
+            - list [ref=e284]:
+              - listitem [ref=e285]: 엔티티 추출 파이프라인
+              - listitem [ref=e286]: 그래프 DB 운영
+              - listitem [ref=e287]: 관계 스키마 설계
+          - generic [ref=e288]:
+            - generic [ref=e289]: BMS라면
+            - paragraph [ref=e290]:
+              - text: fault_catalog.yaml → 노드·엣지 자동 추출.
+              - text: "\"공통 원인\", \"연관 고장\" 질문에 대응 가능해진다."
+        - generic [ref=e291]: — Microsoft GraphRAG (2024)
+      - generic:
+        - heading [level=2]: 전체 지도 — 세 접근의 위치
+        - generic:
+          - generic:
+            - generic: Naive RAG ← 현재
+            - table:
+              - rowgroup:
+                - row:
+                  - cell: 무엇
+                  - cell: 임베딩→검색→LLM 선형
+                - row:
+                  - cell: 강점
+                  - cell: 단순, 빠른 구축, 가시화 쉬움
+                - row:
+                  - cell: 비용
+                  - cell: 최소 (벡터 DB + LLM)
+                - row:
+                  - cell: 쓸 때
+                  - cell: 명확한 단일 질문, 도메인 문서 Q&A
+          - generic:
+            - generic: Agentic RAG
+            - table:
+              - rowgroup:
+                - row:
+                  - cell: 무엇
+                  - cell: 에이전트가 검색 전략 결정·반복
+                - row:
+                  - cell: 강점
+                  - cell: 불확실한 질문, 다단계 추론
+                - row:
+                  - cell: 비용
+                  - cell: 중간 (오케스트레이션 + latency)
+                - row:
+                  - cell: 쓸 때
+                  - cell: 질문 범위가 불분명, 반복 검색 필요
+          - generic:
+            - generic: Graph RAG
+            - table:
+              - rowgroup:
+                - row:
+                  - cell: 무엇
+                  - cell: 그래프 탐색 + 벡터 결합
+                - row:
+                  - cell: 강점
+                  - cell: 관계 추론, 집계, 다홉
+                - row:
+                  - cell: 비용
+                  - cell: 높음 (그래프 구축·운영)
+                - row:
+                  - cell: 쓸 때
+                  - cell: 도메인이 관계 중심, 엔티티 간 질문
+        - paragraph:
+          - text: ↳ 사다리가 아니라
+          - strong: 선택지
+          - text: 다. 대부분의 도메인 Q&A는 Naive로 충분하다. 문제가 요구하는 구조가 무엇인지가 선택 기준.
+      - generic:
+        - heading [level=2]: BMS RAG 로드맵
+        - generic:
+          - generic:
+            - generic: ✓ 완료
+            - list:
+              - listitem: 스키마 + pgvector
+              - listitem: 인덱싱 (7문서 / 37청크)
+              - listitem: 검색 eval recall 100%
+              - listitem: 답변 가드 5종 12/12
+              - listitem:
+                - strong: 5노드 가시화
+                - text: (Activepieces)
+              - listitem: Slack 봇 E2E 왕복
+          - generic:
+            - generic: □ 다음
+            - list:
+              - listitem: 로그 시뮬레이터 (T6)
+              - listitem: 고장 자동 감지 (T8)
+              - listitem: Slack 알림 발송
+              - listitem: "flow1: 감지→알림 파이프라인"
+          - generic:
+            - generic: 더 나아가면
+            - list:
+              - listitem: Agentic 재검색
+              - listitem: Graph 관계추론
+              - listitem: 멀티모달 (센서 이미지)
+              - listitem: 문제가 요구할 때
+        - paragraph:
+          - text: ↳ 가시화로 RAG 내부를 이해했으니, 다음은 이 위에
+          - strong: 무엇을 얹을지
+          - text: . 학습 → 구현 → 확장의 자연스러운 흐름.
+    - link "84 / 87" [ref=e292] [cursor=pointer]:
+      - /url: "#/rag-graph-rag"
+    - complementary:
+      - button "previous slide" [ref=e108] [cursor=pointer]
+      - button "next slide" [ref=e110] [cursor=pointer]
+    - text: Speaker notes
+    - generic [ref=e114]: Graph RAG 진입은 벡터, 확장은 그래프. 질문 → 벡터 검색 진입 노드 탐색 → 유사 엔티티 그래프 이웃 확장 관계 따라 탐색 → 관련 노드·엣지 컨텍스트 수집 구조화된 사실 → LLM 답변 생성 → 답변 + 경로 인용 강점 다홉 관계 추론 집계·요약 질문 엔티티 중심 탐색 비용 엔티티 추출 파이프라인 그래프 DB 운영 관계 스키마 설계 BMS라면 fault_catalog.yaml → 노드·엣지 자동 추출. "공통 원인", "연관 고장" 질문에 대응 가능해진다. — Microsoft GraphRAG (2024)

@@ -1,0 +1,155 @@
+- generic [active] [ref=e6]:
+  - generic [ref=e1]:
+    - button "🌙" [ref=e2] [cursor=pointer]
+    - button "☀️" [ref=e3] [cursor=pointer]
+    - button "🌌" [ref=e4] [cursor=pointer]
+  - application [ref=e7]:
+    - generic:
+      - text: ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳
+      - generic:
+        - heading [level=2]:
+          - text: 왜
+          - strong: RAG
+          - text: 인가
+        - generic:
+          - generic:
+            - generic: LLM 단독
+            - generic: ✗ 학습 컷오프 이후 정보 없음
+            - generic: ✗ 사내·도메인 문서를 모름
+            - generic: ✗ 출처 없는 자신감 있는 답변 (환각)
+            - generic: ✗ "어느 문서에서 나온 말이냐?" 불투명
+          - generic:
+            - generic: LLM + RAG
+            - generic: ✓ DB 업데이트만으로 즉시 최신 정보 반영
+            - generic: ✓ 내부 문서를 컨텍스트로 주입
+            - generic: ✓ 근거 있을 때만 답변, 없으면 "모름" 명시
+            - generic: ✓ 각 주장에 chunk_id 인용 — 추적 가능
+        - paragraph: ↳ [BMS] "냉매가 새는데 어떻게 대처하죠?" — 일반 LLM은 우리 장비 문서(E-3002)를 모른다.
+      - generic:
+        - heading [level=2]: RAG 한 문장
+        - paragraph:
+          - text: 답하기 전에
+          - strong: 관련 문서를 찾아
+          - text: 함께 넣어주는 것
+        - generic:
+          - generic:
+            - generic: 닫힌 책 시험
+            - paragraph: 외운 것만으로 답한다 = LLM 단독
+            - paragraph: 학습 당시 데이터 = 유일한 참고서
+          - generic:
+            - generic: 오픈북 시험
+            - paragraph: 질문 받으면 먼저 참고서에서 찾고, 보고 답한다 = RAG
+            - paragraph: 질의 시점에 관련 조각을 컨텍스트로 주입
+        - generic:
+          - generic:
+            - strong: R
+            - text: etrieval +
+            - strong: A
+            - text: ugmented +
+            - strong: G
+            - text: eneration
+          - paragraph: 찾기 · 보강 · 생성
+      - generic [ref=e159]:
+        - heading "동작 흐름 전체" [level=2] [ref=e160]
+        - generic [ref=e161]:
+          - generic [ref=e162]:
+            - generic [ref=e163]: 색인 · offline — 문서 갱신 시 1회
+            - generic [ref=e164]:
+              - generic [ref=e165]: 문서
+              - generic [ref=e166]: →
+              - generic [ref=e167]: 청크 분할
+              - generic [ref=e168]: →
+              - generic [ref=e169]: 임베딩 모델
+              - generic [ref=e170]: →
+              - generic [ref=e171]: 벡터 DB
+          - generic [ref=e172]: ↕ 검색 대상 — 벡터 DB에서 유사도 검색으로
+          - generic [ref=e173]:
+            - generic [ref=e174]: 질의 · online — 질문마다
+            - generic [ref=e175]:
+              - generic [ref=e176]: 질문
+              - generic [ref=e177]: →
+              - generic [ref=e178]: 임베딩 모델
+              - generic [ref=e179]: →
+              - generic [ref=e180]: 유사도 검색
+              - generic [ref=e181]: →
+              - generic [ref=e182]: 프롬프트 조립
+              - generic [ref=e183]: →
+              - generic [ref=e184]: LLM
+              - generic [ref=e185]: →
+              - generic [ref=e186]: 답변 + 출처
+        - generic [ref=e187]:
+          - generic [ref=e188]:
+            - generic [ref=e189]: 색인 — BMS
+            - paragraph [ref=e190]:
+              - text: "기술문서 7종 → ## 섹션 단위 →"
+              - strong [ref=e191]: 37 청크
+              - text: text-embedding-3-large @1536d → Supabase pgvector
+          - generic [ref=e192]:
+            - generic [ref=e193]: 질의 — BMS
+            - paragraph [ref=e194]:
+              - text: "\"냉매가 새는 것 같아요\" → 임베딩 → match_documents"
+              - text: Top-5 청크 → gpt-4o → E-3002 기반 답변
+      - generic:
+        - heading [level=2]: 기술 컴포넌트 지도
+        - generic:
+          - generic:
+            - generic: ① 임베딩 모델
+            - paragraph: 텍스트를 벡터로 변환
+            - paragraph: text-embedding-3-large @1536d
+          - generic:
+            - generic: ② 벡터 DB
+            - paragraph: 벡터 저장 + 유사도 검색
+            - paragraph: Supabase pgvector HNSW 코사인
+          - generic:
+            - generic: ③ 검색
+            - paragraph: Top-K 코사인 threshold 필터
+            - paragraph: match_documents RPC strict 0.34 / widen 0.30
+          - generic:
+            - generic: ④ LLM
+            - paragraph: 청크 + 질문으로 답변 생성
+            - paragraph: gpt-4o temperature 0
+          - generic:
+            - generic: ⑤ 오케스트레이션
+            - paragraph: 단계 연결 + 흐름 제어
+            - paragraph: Activepieces (가시화) FastAPI (실제 봇)
+        - paragraph: ↳ 컴포넌트는 인터페이스만 맞으면 교체 가능 — 모델 바꿔도 DB 마이그레이션 없이 재인덱싱만.
+      - generic:
+        - heading [level=2]: 청킹 — 왜 자르나
+        - generic:
+          - generic:
+            - generic:
+              - generic: ① 검색 정밀도
+              - paragraph: 큰 문서 = 관련 없는 내용이 딸려옴. 작은 조각 = 질문과 맞는 부분만 히트.
+            - generic:
+              - generic: ② 임베딩 입력 한계
+              - paragraph: 긴 텍스트일수록 의미가 뭉개짐. 섹션 단위일수록 벡터 품질 ↑.
+            - generic:
+              - generic: ③ LLM 컨텍스트 절약
+              - paragraph: 필요한 조각만 주면 비용·속도·집중도 모두 개선.
+          - generic:
+            - generic:
+              - generic: 문서 1개 (M-2001 냉동기매뉴얼)
+              - generic:
+                - generic: "## 개요"
+                - generic: "## 정기 점검 항목"
+                - generic: "## 이상 증상 대처"
+                - generic: "## 부품 교체 주기"
+              - generic:
+                - text: →
+                - strong: "##"
+                - text: 섹션 단위 = 청크 4개
+            - generic:
+              - generic: BMS 일화
+              - paragraph:
+                - text: "P-1001에 ## 증상 섹션이 없어 \"바람이 약해요\" 검색 실패. 섹션 추가 후"
+                - strong: recall 90% → 100%
+                - text: .
+              - paragraph: 청킹 설계가 검색 품질을 좌우한다.
+      - text: ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳
+    - link "68 / 87" [ref=e195] [cursor=pointer]:
+      - /url: "#/rag-flow"
+    - complementary:
+      - button "previous slide" [ref=e108] [cursor=pointer]
+      - button "next slide" [ref=e110] [cursor=pointer]
+    - text: Speaker notes
+    - generic [ref=e114]: "동작 흐름 전체 색인 · offline — 문서 갱신 시 1회 문서 → 청크 분할 → 임베딩 모델 → 벡터 DB ↕ 검색 대상 — 벡터 DB에서 유사도 검색으로 질의 · online — 질문마다 질문 → 임베딩 모델 → 유사도 검색 → 프롬프트 조립 → LLM → 답변 + 출처 색인 — BMS 기술문서 7종 → ## 섹션 단위 → 37 청크 text-embedding-3-large @1536d → Supabase pgvector 질의 — BMS \"냉매가 새는 것 같아요\" → 임베딩 → match_documents Top-5 청크 → gpt-4o → E-3002 기반 답변"

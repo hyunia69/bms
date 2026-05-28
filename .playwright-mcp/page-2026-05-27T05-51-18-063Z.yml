@@ -1,0 +1,32 @@
+- generic [active] [ref=e6]:
+  - generic [ref=e1]:
+    - button "🌙" [ref=e2] [cursor=pointer]
+    - button "☀️" [ref=e3] [cursor=pointer]
+    - button "🌌" [ref=e4] [cursor=pointer]
+  - application [ref=e7]:
+    - generic:
+      - generic [ref=e8]:
+        - generic [ref=e9]: SEMINAR · 2026
+        - heading "바이브코딩 → 에이전틱 엔지니어링" [level=1] [ref=e10]:
+          - text: 바이브코딩 →
+          - text: 에이전틱 엔지니어링
+        - paragraph [ref=e11]: 1년의 변화, 그리고 우리가 가야 할 곳
+        - paragraph [ref=e12]: 이 슬라이드는 Claude Code로 만들어졌다.
+      - generic:
+        - generic: ACT 1
+        - heading [level=1]: 무엇이 일어났는가
+        - paragraph: 바이브코딩의 1년, 그리고 다음
+      - generic:
+        - heading [level=2]: 2025년 2월 2일
+        - blockquote:
+          - text: "\"There's a new kind of coding I call"
+          - strong: vibe coding
+          - text: ", where you fully give in to the vibes, embrace exponentials, and forget that the code even exists.\" \"It's possible because the LLMs (e.g. Cursor Composer w Sonnet) are getting too good.\""
+        - generic: — Andrej Karpathy, X (구 Twitter), 2025.02.02 · Collins English Dictionary 2025 올해의 단어
+      - text: ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳
+    - link "1 / 87" [ref=e17] [cursor=pointer]:
+      - /url: "#/"
+    - complementary:
+      - button "next slide" [ref=e18] [cursor=pointer]
+    - text: Speaker notes
+    - generic [ref=e21]: SEMINAR · 2026 바이브코딩 → 에이전틱 엔지니어링 1년의 변화, 그리고 우리가 가야 할 곳 이 슬라이드는 Claude Code로 만들어졌다.

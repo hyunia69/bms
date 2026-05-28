@@ -1,0 +1,195 @@
+- generic [active] [ref=e6]:
+  - generic [ref=e1]:
+    - button "🌙" [ref=e2] [cursor=pointer]
+    - button "☀️" [ref=e3] [cursor=pointer]
+    - button "🌌" [ref=e4] [cursor=pointer]
+  - application [ref=e7]:
+    - generic:
+      - text: ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳ ↳
+      - generic:
+        - heading [level=2]: 임베딩 — 텍스트를 벡터로
+        - paragraph: 의미가 가까우면 벡터도 가깝다.
+        - generic:
+          - generic:
+            - generic: 의미 공간 (2D 투영)
+            - img:
+              - generic: 냉매 누출
+              - generic: 냉매 부족
+              - generic: 필터 막힘
+              - generic: 점심 메뉴
+              - generic: 주말 날씨
+              - generic: 질문 벡터
+            - paragraph: BMS 관련 텍스트끼리 군집 — "점심 메뉴"는 멀리
+          - generic:
+            - generic:
+              - generic: BMS — text-embedding-3-large @1536d
+              - paragraph:
+                - text: 기본 3072d가 아닌
+                - strong: 1536d 고정 계약
+                - text: . 색인·질의 양쪽 동일 모델·차원 필수.
+            - generic:
+              - generic: 노드2 실제 출력 (앞 5개)
+              - code: "[-0.0537, -0.0198, 0.0023, 0.0331, 0.0401, … ×1536개]"
+            - generic:
+              - paragraph: 차원 = 의미 해상도. 모델 교체 시 차원 유지 → DB 마이그레이션 없이 재인덱싱만.
+      - generic:
+        - heading [level=2]: 벡터 검색 — 코사인 유사도 Top-K
+        - generic:
+          - generic:
+            - generic: 코사인 유사도
+            - img:
+              - generic: 질문
+              - generic: 청크A
+              - generic: 청크B
+              - generic: θ≈11°
+            - paragraph: θ 작을수록 유사
+          - generic:
+            - generic: BMS 실제 검색 결과 — "냉매가 새는 것 같아요"
+            - table:
+              - rowgroup:
+                - row:
+                  - columnheader: "#"
+                  - columnheader: 문서 / 섹션
+                  - columnheader: 유사도
+              - rowgroup:
+                - row:
+                  - cell: "1"
+                  - cell: P-1001 / 증상
+                  - cell: "0.391"
+                - row:
+                  - cell: "2"
+                  - cell: E-3002 / 가능한 원인
+                  - cell: "0.370"
+                - row:
+                  - cell: "3"
+                  - cell: M-2001 / 정기 점검 항목
+                  - cell: "0.367"
+                - row:
+                  - cell: "4"
+                  - cell: E-3002 / 즉각 조치
+                  - cell: "0.357"
+                - row:
+                  - cell: "5"
+                  - cell: P-1001 / 비고
+                  - cell: "0.354"
+        - paragraph:
+          - text: ↳ 질문은 "냉매가 새는"인데 1위가
+          - strong: P-1001(필터)
+          - text: — 키워드가 아니라
+          - strong: 의미(이상 증상 맥락)
+          - text: 로 찾기 때문. strict threshold 0.34 전부 통과 → E-3002도 포함.
+      - generic [ref=e8]:
+        - heading "프롬프트 조립 + 생성 · 인용" [level=2] [ref=e9]
+        - generic [ref=e10]:
+          - generic [ref=e11]:
+            - generic [ref=e12]: 프롬프트 골격 (노드4 조립)
+            - code [ref=e14]: "{ \"messages\": [ { \"role\": \"system\", \"content\": \"주어진 청크만 근거로 답변하라.\" }, { \"role\": \"user\", \"content\": \"질문: 냉매가 새는 것 같아요\\n\\n[chunk_id=0] P-1001/증상: ...\\n[chunk_id=1] E-3002/가능한 원인: ...\\n[chunk_id=2] M-2001/정기 점검 항목: ...\\n[chunk_id=3] E-3002/즉각 조치: ...\\n[chunk_id=4] P-1001/비고: ...\" } ], \"model\": \"gpt-4o\", \"temperature\": 0 }"
+          - generic [ref=e15]:
+            - generic [ref=e16]:
+              - generic [ref=e17]: LLM 선택 (BMS)
+              - paragraph [ref=e18]:
+                - text: 검색 1위 P-1001(필터)이 아니라
+                - strong [ref=e19]: E-3002(냉매) 청크를 근거로 선택
+                - text: . 질문 맥락에 맞는 문서를 LLM이 판단.
+            - generic [ref=e20]:
+              - generic [ref=e21]: 답변 구조
+              - paragraph [ref=e22]: 원인 3개 (배관/플레어 누출 [chunk_id=1] · 냉매 충전량 부족 [chunk_id=1] · 증발기 코일 동결 [chunk_id=3]) + 점검 3개, 각 주장에 chunk_id 인용
+            - generic [ref=e23]:
+              - generic [ref=e24]: .
+              - paragraph [ref=e25]: chunk_id 인용 = 환각 억제 + 출처 추적의 핵심. "어느 문서에 근거?" 를 답변에서 직접 확인 가능.
+      - generic:
+        - heading [level=2]: 5노드 가시화 — RAG를 블랙박스로 두지 않는다
+        - generic:
+          - generic:
+            - generic: Webhook
+            - generic: 질문 수신
+          - generic:
+            - generic: →
+            - generic: 질문 텍스트
+          - generic:
+            - generic: HTTP 임베딩
+            - generic: OpenAI API
+          - generic:
+            - generic: →
+            - generic: 1536개 벡터
+          - generic:
+            - generic: HTTP 검색
+            - generic: match_documents
+          - generic:
+            - generic: →
+            - generic: 유사도 Top-5
+          - generic:
+            - generic: Code 조립
+            - generic: 프롬프트 구성
+          - generic:
+            - generic: →
+            - generic: 프롬프트 JSON
+          - generic:
+            - generic: HTTP LLM
+            - generic: gpt-4o
+        - generic:
+          - generic:
+            - strong: 노드1
+            - text: 질문 텍스트
+          - generic:
+            - strong: 노드2
+            - text: "[-0.054, …] ×1536"
+          - generic:
+            - strong: 노드3
+            - text: 유사도 표 0.3704
+          - generic:
+            - strong: 노드4
+            - text: 프롬프트 JSON
+          - generic:
+            - strong: 노드5
+            - text: 답변 + 인용
+        - paragraph:
+          - text: ↳ Activepieces 캔버스에서 각 노드를 클릭하면
+          - strong: 실제 중간 데이터
+          - text: 가 보인다. 노드3 유사도
+          - strong: "0.3704"
+          - text: = CLI(rag_answer.py)
+          - strong: "0.370"
+          - text: 일치 — 캔버스가 같은 RAG임 실증.
+      - generic:
+        - heading [level=2]: RAG의 안전장치
+        - paragraph: 검색됐다고 다 믿지 않는다.
+        - generic:
+          - generic:
+            - generic: ① threshold gate
+            - paragraph:
+              - text: strict
+              - strong: "0.34"
+              - text: → widen
+              - strong: "0.30"
+              - text: 그래도 없으면 →
+              - strong: 근거없음
+              - text: 반환. 유사도 낮은 청크는 버린다.
+          - generic:
+            - generic: ② 사후 가드 5종
+            - list:
+              - listitem: 가짜인용 = 0
+              - listitem: 인용 100% (청크에 없으면 탈락)
+              - listitem:
+                - strong: 제어지시 = 0
+              - listitem: 원인 후보 ≤ 3
+              - listitem: no_basis 일관성
+          - generic:
+            - generic: ③ 위반 시
+            - paragraph:
+              - text: 1회 재생성 시도. 그래도 위반 →
+              - strong: 근거없음
+              - text: 으로 교체. 답변이 나오지 않는 게 잘못된 답보다 낫다.
+        - paragraph:
+          - text: "↳ [BMS] 가시화 플로우는 happy path만(가드 미포함). 실제 봇에서 가드가 2차 방어. 예:"
+          - strong: "\"압축기를 멈추세요\""
+          - text: 같은 제어 지시 차단(제어지시0 = 0건 확인).
+        - generic: "— BMS POC answer_eval.py: 가드 불변식 12/12 PASS (control_bait 3건 전원 차단)"
+      - text: ↳ ↳ ↳ ↳ ↳ ↳ ↳
+    - link "73 / 87" [ref=e28] [cursor=pointer]:
+      - /url: "#/rag-generate"
+    - complementary:
+      - button "previous slide" [ref=e29] [cursor=pointer]
+      - button "next slide" [ref=e31] [cursor=pointer]
+    - text: Speaker notes
+    - generic [ref=e35]: "동작 흐름 전체 색인 · offline — 문서 갱신 시 1회 문서 → 청크 분할 → 임베딩 모델 → 벡터 DB ↕ 검색 대상 — 벡터 DB에서 유사도 검색으로 질의 · online — 질문마다 질문 → 임베딩 모델 → 유사도 검색 → 프롬프트 조립 → LLM → 답변 + 출처 색인 — BMS 기술문서 7종 → ## 섹션 단위 → 37 청크 text-embedding-3-large @1536d → Supabase pgvector 질의 — BMS \"냉매가 새는 것 같아요\" → 임베딩 → match_documents Top-5 청크 → gpt-4o → E-3002 기반 답변"

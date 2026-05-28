@@ -1,0 +1,23 @@
+[    1103ms] [ERROR] Failed to load resource: the server responded with a status of 404 (File not found) @ http://localhost:8000/favicon.ico:0
+[   23970ms] [ERROR] Error: <g> attribute transform: Expected number, "translate(undefined, NaN)". @ https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js:5
+[   23970ms] [ERROR] Error: <g> attribute transform: Expected number, "translate(undefined, NaN)". @ https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js:5
+[   23971ms] [ERROR] Error: <g> attribute transform: Expected number, "translate(undefined, NaN)". @ https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js:5
+[   23978ms] [ERROR] Error: <g> attribute transform: Expected number, "translate(undefined, NaN)". @ https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js:86
+[   23978ms] [ERROR] Error: <g> attribute transform: Expected number, "translate(undefined, NaN)". @ https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js:86
+[   23978ms] [ERROR] Error: <g> attribute transform: Expected number, "translate(undefined, NaN)". @ https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js:86
+[   24008ms] [ERROR] Error: <g> attribute transform: Expected number, "translate(undefined, NaN)". @ https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js:5
+[   24008ms] [ERROR] Error: <g> attribute transform: Expected number, "translate(undefined, NaN)". @ https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js:5
+[   24024ms] [ERROR] Error: <g> attribute transform: Expected number, "translate(undefined, NaN)". @ https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js:5
+[   24024ms] [ERROR] Error: <g> attribute transform: Expected number, "translate(undefined, NaN)". @ https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js:5
+[   24025ms] [ERROR] Error: <g> attribute transform: Expected number, "translate(undefined, NaN)". @ https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js:5
+[   24025ms] [ERROR] Error: <g> attribute transform: Expected number, "translate(undefined, NaN)". @ https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js:5
+[   24025ms] [ERROR] Error: <g> attribute transform: Expected number, "translate(undefined, NaN)". @ https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js:5
+[   24025ms] [ERROR] Error: <g> attribute transform: Expected number, "translate(undefined, NaN)". @ https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js:5
+[   24029ms] [ERROR] Error: <g> attribute transform: Expected number, "translate(undefined, NaN)". @ https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js:86
+[   24029ms] [ERROR] Error: <g> attribute transform: Expected number, "translate(undefined, NaN)". @ https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js:86
+[   24029ms] [ERROR] Error: <g> attribute transform: Expected number, "translate(undefined, NaN)". @ https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js:86
+[   24029ms] [ERROR] Error: <g> attribute transform: Expected number, "translate(undefined, NaN)". @ https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js:86
+[   24029ms] [ERROR] Error: <g> attribute transform: Expected number, "translate(undefined, NaN)". @ https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js:86
+[   24029ms] [ERROR] Error: <g> attribute transform: Expected number, "translate(undefined, NaN)". @ https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js:86
+[   24043ms] [ERROR] Error: <g> attribute transform: Expected number, "translate(undefined, NaN)". @ https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js:5
+[   24043ms] [ERROR] Error: <g> attribute transform: Expected number, "translate(undefined, NaN)". @ https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js:5

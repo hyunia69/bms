@@ -1,0 +1,6 @@
+- generic [active]:
+  - generic [ref=e1]:
+    - button "🌙" [ref=e2] [cursor=pointer]
+    - button "☀️" [ref=e3] [cursor=pointer]
+    - button "🌌" [ref=e4] [cursor=pointer]
+  - generic [ref=e5]: 슬라이드 로딩 중...
